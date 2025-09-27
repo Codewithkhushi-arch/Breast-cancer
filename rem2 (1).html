@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Breast Cancer Detection AI Assistant</title>
+    <style>
+        :root {
+            --primary-color: #e75480;
+            --secondary-color: #f8f9fa;
+            --accent-color: #4a90e2;
+            --text-color: #333;
+            --light-text: #666;
+            --border-color: #ddd;
+            --bot-bubble: #f0f0f0;
+            --user-bubble: var(--primary-color);
+            --shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            --warning-color: #ff9800;
+            --success-color: #4caf50;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f5f5;
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            padding: 20px 0;
+            background-color: white;
+            box-shadow: var(--shadow);
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        
+        h1 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            color: var(--light-text);
+            font-size: 1.1rem;
+        }
+        
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            height: 70vh;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+        
+        .chat-header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .chat-header img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+        
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .message {
+            max-width: 80%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            position: relative;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .bot-message {
+            align-self: flex-start;
+            background-color: var(--bot-bubble);
+            border-bottom-left-radius: 5px;
+        }
+        
+        .user-message {
+            align-self: flex-end;
+            background-color: var(--user-bubble);
+            color: white;
+            border-bottom-right-radius: 5px;
+        }
+        
+        .message-time {
+            font-size: 0.7rem;
+            opacity: 0.7;
+            margin-top: 5px;
+            text-align: right;
+        }
+        
+        .symptom-assessment {
+            background-color: #fff8e1;
+            border-left: 4px solid var(--warning-color);
+            padding: 10px 15px;
+            margin-top: 10px;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .symptom-assessment h4 {
+            color: var(--warning-color);
+            margin-bottom: 5px;
+        }
+        
+        .chat-input {
+            display: flex;
+            padding: 15px;
+            border-top: 1px solid var(--border-color);
+            background-color: var(--secondary-color);
+        }
+        
+        .chat-input input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 30px;
+            outline: none;
+            font-size: 1rem;
+        }
+        
+        .chat-input button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 45px;
+            height: 45px;
+            margin-left: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.3s;
+        }
+        
+        .chat-input button:hover {
+            background-color: #d1436f;
+        }
+        
+        .quick-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            padding: 15px;
+            background-color: var(--secondary-color);
+            border-top: 1px solid var(--border-color);
+        }
+        
+        .quick-action {
+            background-color: white;
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 8px 15px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .quick-action:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: var(--accent-color);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 5px;
+            box-shadow: var(--shadow);
+            display: flex;
+            align-items: center;
+            animation: slideIn 0.5s ease;
+            z-index: 1000;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        .notification.hidden {
+            display: none;
+        }
+        
+        .notification button {
+            background: none;
+            border: none;
+            color: white;
+            margin-left: 10px;
+            cursor: pointer;
+        }
+        
+        .reminder-section {
+            margin-top: 20px;
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: var(--shadow);
+        }
+        
+        .reminder-section h3 {
+            color: var(--primary-color);
+            margin-bottom: 15px;
+        }
+        
+        .reminder-form {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .reminder-form input, .reminder-form select {
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            flex: 1;
+            min-width: 150px;
+        }
+        
+        .reminder-form button {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 20px;
+            cursor: pointer;
+        }
+        
+        @media (max-width: 768px) {
+            .chat-container {
+                height: 60vh;
+            }
+            
+            .message {
+                max-width: 90%;
+            }
+            
+            .quick-actions {
+                justify-content: center;
+            }
+        }
+        
+        .typing-indicator {
+            display: flex;
+            align-items: center;
+            margin: 10px 0;
+        }
+        
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--light-text);
+            border-radius: 50%;
+            margin: 0 2px;
+            animation: typing 1.4s infinite ease-in-out;
+        }
+        
+        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+        
+        @keyframes typing {
+            0%, 80%, 100% { transform: scale(0.8); opacity: 0.5; }
+            40% { transform: scale(1); opacity: 1; }
+        }
+        
+        .disclaimer {
+            background-color: #ffebee;
+            border-left: 4px solid #f44336;
+            padding: 10px 15px;
+            margin-top: 10px;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.9rem;
+        }
+        
+        .suggested-questions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        
+        .suggested-question {
+            background-color: #e3f2fd;
+            border: 1px solid #bbdefb;
+            border-radius: 15px;
+            padding: 5px 10px;
+            font-size: 0.8rem;
+            cursor: pointer;
+        }
+        
+        .suggested-question:hover {
+            background-color: #bbdefb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Breast Cancer Detection AI Assistant</h1>
+            <p class="subtitle">Your personal health companion for early detection and care</p>
+        </header>
+        
+        <div class="chat-container">
+            <div class="chat-header">
+                <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMjAiIGN5PSIyMCIgcj0iMjAiIGZpbGw9IiNlNzU0ODAiLz4KPHBhdGggZD0iTTE1IDE1QzE1IDE1IDIwIDEwIDI1IDE1QzI1IDE1IDMwIDIwIDE1IDI1QzE1IDI1IDIwIDMwIDE1IDE1WiIgZmlsbD0id2hpdGUiLz4KPHBhdGggZD0iTTE2IDE2QzE2IDE2IDIwIDEyIDI0IDE2QzI0IDE2IDI4IDIwIDE2IDI0QzE2IDI0IDIwIDI4IDE2IDE2WiIgZmlsbD0iI2U3NTQ4MCIvPgo8L3N2Zz4K" alt="AI Assistant">
+                <div>
+                    <h3>HealthBot AI</h3>
+                    <p>Online - Ready to help</p>
+                </div>
+            </div>
+            
+            <div class="chat-messages" id="chatMessages">
+                <div class="message bot-message">
+                    <p>Hello! I'm your Breast Cancer Detection AI Assistant. I'm here to help you understand symptoms, provide information about detection methods, suggest healthcare resources, and set reminders for checkups. How can I assist you today?</p>
+                    <div class="disclaimer">
+                        <strong>Important:</strong> I am an AI assistant and cannot provide medical diagnoses. Always consult with a healthcare professional for medical advice.
+                    </div>
+                    <div class="message-time" id="currentTime"></div>
+                </div>
+            </div>
+            
+            <div class="quick-actions">
+                <div class="quick-action" onclick="quickAction('symptoms')">Common Symptoms</div>
+                <div class="quick-action" onclick="quickAction('detection')">Detection Methods</div>
+                <div class="quick-action" onclick="quickAction('medication')">Medication Info</div>
+                <div class="quick-action" onclick="quickAction('diet')">Diet Recommendations</div>
+                <div class="quick-action" onclick="quickAction('hospitals')">Nearby Hospitals</div>
+            </div>
+            
+            <div class="chat-input">
+                <input type="text" id="userInput" placeholder="Describe how you're feeling or ask a question..." onkeypress="handleKeyPress(event)">
+                <button onclick="sendMessage()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
+                        <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        
+        <div class="reminder-section">
+            <h3>Set Checkup Reminder</h3>
+            <div class="reminder-form">
+                <input type="text" id="reminderTitle" placeholder="Reminder title">
+                <input type="datetime-local" id="reminderDate">
+                <select id="reminderType">
+                    <option value="notification">Browser Notification</option>
+                    <option value="sms">SMS (simulated)</option>
+                </select>
+                <button onclick="setReminder()">Set Reminder</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="notification hidden" id="reminderNotification">
+        <span id="notificationText"></span>
+        <button onclick="dismissNotification()">×</button>
+    </div>
+
+    <script>
+        // Enhanced knowledge base with more symptom information
+        const knowledgeBase = {
+            "symptoms": "Common symptoms of breast cancer may include: a lump or thickening in the breast or underarm, change in size or shape of the breast, dimpling or puckering of the skin, nipple discharge (especially if bloody), redness or scaling of the nipple or breast skin, and persistent breast pain. However, many breast cancers are asymptomatic in early stages, which is why regular screening is important.",
+            
+            "detection": "Breast cancer can be detected through several methods: 1) Mammography (X-ray of the breast) - recommended annually for women over 40, 2) Clinical breast exam by a healthcare professional, 3) Breast self-exam to notice changes, 4) Ultrasound for dense breast tissue, 5) MRI for high-risk individuals, and 6) Biopsy if abnormalities are found. Early detection significantly improves treatment outcomes.",
+            
+            "medication": "Treatment depends on cancer type and stage. Common medications include: 1) Hormone therapy (Tamoxifen, Aromatase inhibitors) for hormone receptor-positive cancers, 2) Chemotherapy (doxorubicin, paclitaxel) to kill cancer cells, 3) Targeted therapy (Herceptin for HER2-positive cancers), 4) Immunotherapy to boost immune response. Always consult an oncologist for personalized treatment plans.",
+            
+            "diet": "A healthy diet may help reduce breast cancer risk and support during treatment: 1) Eat plenty of fruits and vegetables, 2) Choose whole grains over refined grains, 3) Limit processed and red meats, 4) Include lean proteins like fish and legumes, 5) Limit alcohol consumption, 6) Maintain healthy weight. Specific diets should be discussed with a nutritionist familiar with cancer care.",
+            
+            "hospitals": "For breast cancer care, consider these renowned hospitals (always verify with your insurance): 1) MD Anderson Cancer Center (Houston), 2) Memorial Sloan Kettering Cancer Center (NYC), 3) Mayo Clinic (multiple locations), 4) Dana-Farber Cancer Institute (Boston), 5) Johns Hopkins Hospital (Baltimore). Use our hospital locator for facilities near you.",
+            
+            "prevention": "While not all breast cancer can be prevented, you can reduce risk by: 1) Maintaining healthy weight, 2) Exercising regularly, 3) Limiting alcohol, 4) Avoiding smoking, 5) Breastfeeding if possible, 6) Limiting hormone therapy, 7) Getting regular screenings, especially with family history.",
+            
+            "stages": "Breast cancer is staged from 0 to IV: Stage 0 (non-invasive), Stage I-II (early, localized), Stage III (locally advanced), Stage IV (metastatic, spread to other organs). Treatment options and prognosis vary by stage. Early detection typically leads to better outcomes.",
+            
+            "support": "Emotional support is crucial. Consider: 1) Joining support groups (American Cancer Society offers many), 2) Talking to a therapist specializing in cancer care, 3) Involving family and friends in your journey, 4) Exploring meditation and stress-reduction techniques, 5) Contacting organizations like Susan G. Komen for resources.",
+            
+            "nausea": "Nausea can have many causes and is not typically a direct symptom of breast cancer. However, it can be a side effect of cancer treatments like chemotherapy. If you're experiencing persistent nausea, it's important to consult a doctor to determine the cause. In the meantime, try eating small, frequent meals and avoiding strong odors.",
+            
+            "fatigue": "Fatigue is common with many health conditions. While it can be associated with advanced cancer, it's more often related to other factors like stress, anemia, or sleep issues. If you have persistent fatigue along with other concerning symptoms, it's best to see a healthcare provider for evaluation.",
+            
+            "pain": "Pain can occur with breast cancer, especially if a tumor presses on nerves or other tissues. However, breast pain is more commonly caused by benign conditions like hormonal changes, cysts, or injury. Any new, persistent, or worsening pain should be evaluated by a doctor.",
+            
+            "headache": "Headaches are rarely related to breast cancer unless the cancer has spread to the brain (metastasis). Most headaches have other causes like tension, dehydration, or migraines. If you have severe, persistent headaches or other neurological symptoms, seek medical attention."
+        };
+        
+        // Symptom mapping for better response accuracy
+        const symptomMapping = {
+            // Breast-specific symptoms (high relevance)
+            "lump": "breast cancer symptom",
+            "thickening": "breast cancer symptom", 
+            "discharge": "breast cancer symptom",
+            "nipple": "breast cancer symptom",
+            "dimpling": "breast cancer symptom",
+            "puckering": "breast cancer symptom",
+            
+            // General symptoms that could be related (medium relevance)
+            "pain": "general symptom",
+            "swelling": "general symptom",
+            "fatigue": "general symptom",
+            "weight": "general symptom",
+            
+            // Unrelated symptoms (low relevance)
+            "nausea": "unrelated symptom",
+            "headache": "unrelated symptom",
+            "fever": "unrelated symptom",
+            "cough": "unrelated symptom"
+        };
+        
+        // Simulated user data (in a real app, this would be securely stored)
+        let userProfile = {
+            name: "User",
+            lastCheckup: null,
+            riskFactors: [],
+            reminders: []
+        };
+        
+        // Conversation history for context
+        let conversationHistory = [];
+        
+        // Initialize chat
+        document.addEventListener('DOMContentLoaded', function() {
+            updateTime();
+            // Check for notification permission
+            if ('Notification' in window && Notification.permission === 'default') {
+                Notification.requestPermission();
+            }
+            
+            // Add initial suggested questions
+            showSuggestedQuestions([
+                "What are the early signs of breast cancer?",
+                "How often should I get a mammogram?",
+                "I found a lump in my breast, what should I do?",
+                "What foods help prevent breast cancer?"
+            ]);
+        });
+        
+        // Update time display
+        function updateTime() {
+            const now = new Date();
+            document.getElementById('currentTime').textContent = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        }
+        
+        // Handle quick action buttons
+        function quickAction(action) {
+            const response = knowledgeBase[action] || "I'm not sure how to help with that specific topic. Could you please rephrase your question?";
+            addMessage(response, 'bot');
+        }
+        
+        // Send message function
+        function sendMessage() {
+            const userInput = document.getElementById('userInput');
+            const message = userInput.value.trim();
+            
+            if (message === '') return;
+            
+            // Add user message to chat
+            addMessage(message, 'user');
+            userInput.value = '';
+            
+            // Add to conversation history
+            conversationHistory.push({role: 'user', content: message});
+            
+            // Show typing indicator
+            showTypingIndicator();
+            
+            // Simulate AI processing time
+            setTimeout(() => {
+                // Remove typing indicator
+                removeTypingIndicator();
+                
+                // Generate and add bot response
+                const response = generateResponse(message);
+                addMessage(response, 'bot');
+                
+                // Add to conversation history
+                conversationHistory.push({role: 'bot', content: response});
+            }, 1000 + Math.random() * 1000); // Random delay between 1-2 seconds
+        }
+        
+        // Handle Enter key press
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+        
+        // Add message to chat
+        function addMessage(text, sender) {
+            const chatMessages = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}-message`;
+            
+            const messageText = document.createElement('p');
+            messageText.textContent = text;
+            messageDiv.appendChild(messageText);
+            
+            // Add symptom assessment for relevant bot messages
+            if (sender === 'bot' && text.includes('symptom') || text.includes('nausea') || text.includes('pain')) {
+                const assessmentDiv = document.createElement('div');
+                assessmentDiv.className = 'symptom-assessment';
+                assessmentDiv.innerHTML = `
+                    <h4>Symptom Assessment</h4>
+                    <p>Based on your description, I've provided general information. Remember that many symptoms can have multiple causes, and only a healthcare professional can provide an accurate assessment.</p>
+                `;
+                messageDiv.appendChild(assessmentDiv);
+            }
+            
+            const timeDiv = document.createElement('div');
+            timeDiv.className = 'message-time';
+            timeDiv.textContent = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            messageDiv.appendChild(timeDiv);
+            
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            
+            // Clear any existing suggested questions
+            const existingSuggestions = document.querySelectorAll('.suggested-questions');
+            existingSuggestions.forEach(el => el.remove());
+        }
+        
+        // Show suggested questions
+        function showSuggestedQuestions(questions) {
+            const chatMessages = document.getElementById('chatMessages');
+            const suggestionsDiv = document.createElement('div');
+            suggestionsDiv.className = 'suggested-questions';
+            
+            questions.forEach(question => {
+                const questionDiv = document.createElement('div');
+                questionDiv.className = 'suggested-question';
+                questionDiv.textContent = question;
+                questionDiv.onclick = () => {
+                    document.getElementById('userInput').value = question;
+                    sendMessage();
+                };
+                suggestionsDiv.appendChild(questionDiv);
+            });
+            
+            // Add to the last bot message
+            const lastMessage = chatMessages.lastElementChild;
+            if (lastMessage && lastMessage.classList.contains('bot-message')) {
+                lastMessage.appendChild(suggestionsDiv);
+            }
+        }
+        
+        // Show typing indicator
+        function showTypingIndicator() {
+            const chatMessages = document.getElementById('chatMessages');
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'typing-indicator';
+            typingDiv.id = 'typingIndicator';
+            
+            for (let i = 0; i < 3; i++) {
+                const dot = document.createElement('div');
+                dot.className = 'typing-dot';
+                typingDiv.appendChild(dot);
+            }
+            
+            chatMessages.appendChild(typingDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+        
+        // Remove typing indicator
+        function removeTypingIndicator() {
+            const typingIndicator = document.getElementById('typingIndicator');
+            if (typingIndicator) {
+                typingIndicator.remove();
+            }
+        }
+        
+        // Enhanced AI response generation
+        function generateResponse(userMessage) {
+            const lowerMessage = userMessage.toLowerCase();
+            
+            // Check if this seems like a symptom description
+            const isSymptomQuery = checkIfSymptomQuery(lowerMessage);
+            
+            // Check for exact matches in knowledge base first
+            for (const key in knowledgeBase) {
+                if (lowerMessage.includes(key)) {
+                    // For symptom-related queries, provide more contextual response
+                    if (isSymptomQuery) {
+                        return formatSymptomResponse(key, knowledgeBase[key], lowerMessage);
+                    }
+                    return knowledgeBase[key];
+                }
+            }
+            
+            // For symptom queries that don't match exactly
+            if (isSymptomQuery) {
+                return handleGeneralSymptomQuery(lowerMessage);
+            }
+            
+            // Pattern matching for common questions
+            if (lowerMessage.includes('hello') || lowerMessage.includes('hi') || lowerMessage.includes('hey')) {
+                return "Hello! I'm here to help with breast cancer information, detection methods, treatment options, and setting reminders. What would you like to know?";
+            }
+            
+            if (lowerMessage.includes('thank')) {
+                return "You're welcome! I'm glad I could help. Is there anything else you'd like to know about breast cancer detection or care?";
+            }
+            
+            if (lowerMessage.includes('risk') || lowerMessage.includes('prevent')) {
+                return knowledgeBase['prevention'];
+            }
+            
+            if (lowerMessage.includes('stage') || lowerMessage.includes('advanced')) {
+                return knowledgeBase['stages'];
+            }
+            
+            if (lowerMessage.includes('support') || lowerMessage.includes('emotional') || lowerMessage.includes('cope')) {
+                return knowledgeBase['support'];
+            }
+            
+            // Default response for unrecognized queries
+            return "I understand you're sharing how you're feeling. While I specialize in breast cancer information, I can provide general health guidance. Could you tell me more about your symptoms or ask a specific question about breast health?";
+        }
+        
+        // Check if the query seems to be describing symptoms
+        function checkIfSymptomQuery(message) {
+            const symptomWords = ['pain', 'hurt', 'ache', 'uncomfortable', 'symptom', 'feel', 'feeling', 'nausea', 'tired', 'fatigue', 'headache', 'lump', 'swelling', 'discharge'];
+            return symptomWords.some(word => message.includes(word));
+        }
+        
+        // Format response for symptom queries
+        function formatSymptomResponse(key, response, originalQuery) {
+            let formattedResponse = response;
+            
+            // Add context about breast cancer relevance
+            if (symptomMapping[key] === "breast cancer symptom") {
+                formattedResponse += "\n\nThis symptom is directly associated with breast cancer and should be evaluated by a healthcare professional.";
+            } else if (symptomMapping[key] === "general symptom") {
+                formattedResponse += "\n\nWhile this symptom can sometimes be associated with breast cancer, it's more commonly caused by other conditions. It's still important to discuss any persistent symptoms with your doctor.";
+            } else if (symptomMapping[key] === "unrelated symptom") {
+                formattedResponse += "\n\nThis symptom is not typically associated with breast cancer but could indicate other health issues that should be evaluated.";
+            }
+            
+            // Add follow-up questions
+            const followUps = [
+                "How long have you been experiencing this?",
+                "Is the symptom constant or does it come and go?",
+                "Have you noticed any other changes in your breasts?"
+            ];
+            
+            const randomFollowUp = followUps[Math.floor(Math.random() * followUps.length)];
+            formattedResponse += `\n\nTo better understand your situation: ${randomFollowUp}`;
+            
+            return formattedResponse;
+        }
+        
+        // Handle general symptom queries that don't match specific entries
+        function handleGeneralSymptomQuery(message) {
+            let response = "Thank you for sharing how you're feeling. ";
+            
+            // Check if the query mentions breast-specific concerns
+            if (message.includes('breast') || message.includes('nipple') || message.includes('underarm')) {
+                response += "Since you mentioned breast-related concerns, I recommend paying attention to any changes in your breasts such as lumps, skin changes, or nipple discharge. These should be evaluated by a healthcare provider. ";
+                response += knowledgeBase['symptoms'];
+            } else {
+                response += "The symptom you described may or may not be related to breast health. Many symptoms have multiple possible causes. ";
+                response += "If you're concerned about breast cancer specifically, I can information about common symptoms and detection methods. ";
+                response += "Otherwise, it's always best to consult with a healthcare professional about any persistent symptoms.";
+            }
+            
+            // Add disclaimer
+            response += "\n\nRemember, I'm an AI assistant and cannot provide medical diagnoses. Always consult with a qualified healthcare provider for personal medical advice.";
+            
+            return response;
+        }
+        
+        // Set reminder function
+        function setReminder() {
+            const title = document.getElementById('reminderTitle').value;
+            const date = document.getElementById('reminderDate').value;
+            const type = document.getElementById('reminderType').value;
+            
+            if (!title || !date) {
+                alert('Please fill in both title and date for the reminder.');
+                return;
+            }
+            
+            const reminderDate = new Date(date);
+            const now = new Date();
+            
+            if (reminderDate <= now) {
+                alert('Please select a future date and time for the reminder.');
+                return;
+            }
+            
+            // Add to user profile
+            userProfile.reminders.push({
+                title: title,
+                date: reminderDate,
+                type: type
+            });
+            
+            // Schedule reminder
+            const timeUntilReminder = reminderDate.getTime() - now.getTime();
+            
+            setTimeout(() => {
+                triggerReminder(title, type);
+            }, timeUntilReminder);
+            
+            // Show confirmation
+            addMessage(`I've set a reminder for "${title}" on ${reminderDate.toLocaleString()}. You'll receive a ${type === 'sms' ? 'text message' : 'browser notification'} at that time.`, 'bot');
+            
+            // Clear form
+            document.getElementById('reminderTitle').value = '';
+            document.getElementById('reminderDate').value = '';
+        }
+        
+        // Trigger reminder notification
+        function triggerReminder(title, type) {
+            if (type === 'notification') {
+                if ('Notification' in window && Notification.permission === 'granted') {
+                    new Notification('Breast Cancer Checkup Reminder', {
+                        body: title,
+                        icon: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMjAiIGN5PSIyMCIgcj0iMjAiIGZpbGw9IiNlNzU0ODAiLz4KPHBhdGggZD0iTTE1IDE1QzE1IDE1IDIwIDEwIDI1IDE1QzI1IDE1IDMwIDIwIDE1IDI1QzE1IDI1IDIwIDMwIDE1IDE1WiIgZmlsbD0id2hpdGUiLz4KPHBhdGggZD0iTTE2IDE2QzE2IDE2IDIwIDEyIDI0IDE2QzI0IDE2IDI4IDIwIDE2IDI0QzE2IDI0IDIwIDI4IDE2IDE2WiIgZmlsbD0iI2U3NTQ4MCIvPgo8L3N2Zz4K'
+                    });
+                }
+            } else if (type === 'sms') {
+                // In a real application, this would connect to an SMS service
+                console.log(`SMS reminder: ${title}`);
+            }
+            
+            // Also show in-app notification
+            const notification = document.getElementById('reminderNotification');
+            const notificationText = document.getElementById('notificationText');
+            notificationText.textContent = title;
+            notification.classList.remove('hidden');
+            
+            // Auto-hide after 10 seconds
+            setTimeout(() => {
+                notification.classList.add('hidden');
+            }, 10000);
+        }
+        
+        // Dismiss notification
+        function dismissNotification() {
+            document.getElementById('reminderNotification').classList.add('hidden');
+        }
+        
+        // Simulate periodic checkup reminders (once a day)
+        function schedulePeriodicReminders() {
+            // Check if we should show a reminder today
+            const lastReminder = localStorage.getItem('lastReminderDate');
+            const today = new Date().toDateString();
+            
+            if (lastReminder !== today) {
+                // Show reminder notification
+                setTimeout(() => {
+                    triggerReminder("Don't forget to perform your monthly breast self-exam. Early detection saves lives!", 'notification');
+                    localStorage.setItem('lastReminderDate', today);
+                }, 3000); // Show after 3 seconds of page load
+            }
+        }
+        
+        // Initialize periodic reminders
+        schedulePeriodicReminders();
+    </script>
+</body>
+</html>
