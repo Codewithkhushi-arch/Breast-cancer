@@ -1,0 +1,16 @@
+{
+  "name": "unified-server",
+  "version": "1.0.0",
+  "description": "Unified server for Breast Cancer Website and AI Chatbot",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  },
+  "keywords": ["server", "express", "chatbot", "breast-cancer"],
+  "author": "suhan",
+  "license": "MIT"
+}
