@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block title %}About - Breast Cancer Screening{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h2 class="text-center">About Breast Cancer Screening</h2>
+            </div>
+            <div class="card-body">
+                <p class="lead">Early detection saves lives. Regular breast cancer screening is crucial for women's health.</p>
+                
+                <h4>Why Screen?</h4>
+                <ul>
+                    <li>Early detection improves treatment outcomes</li>
+                    <li>Regular screening can detect cancer before symptoms appear</li>
+                    <li>Peace of mind through preventive care</li>
+                </ul>
+
+                <h4>Our Services</h4>
+                <p>We provide comprehensive breast cancer screening services with experienced healthcare professionals.</p>
+
+                <div class="text-center mt-4">
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'schedule' %}" class="btn btn-primary btn-lg">Schedule Your Screening</a>
+                    {% else %}
+                        <a href="{% url 'login' %}" class="btn btn-primary btn-lg">Login to Schedule Screening</a>
+                        <a href="{% url 'register' %}" class="btn btn-outline-primary btn-lg ms-2">Register</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

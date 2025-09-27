@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+
+{% block title %}Your Schedule - Breast Cancer Screening{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h2>Your Appointments</h2>
+                <a href="{% url 'schedule' %}" class="btn btn-primary">Schedule New Appointment</a>
+            </div>
+            <div class="card-body">
+                {% if appointments %}
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Doctor</th>
+                                    <th>Date</th>
+                                    <th>Time</th>
+                                    <th>Status</th>
+                                    <th>Notes</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for appointment in appointments %}
+                                <tr>
+                                    <td>{{ appointment.doctor_name }}</td>
+                                    <td>{{ appointment.appointment_date|date:"M d, Y" }}</td>
+                                    <td>{{ appointment.appointment_time|time:"g:i A" }}</td>
+                                    <td>
+                                        <span class="badge 
+                                            {% if appointment.status == 'Confirmed' %}bg-success
+                                            {% elif appointment.status == 'Pending' %}bg-warning
+                                            {% else %}bg-danger{% endif %}">
+                                            {{ appointment.status }}
+                                        </span>
+                                    </td>
+                                    <td>{{ appointment.notes|default:"No notes" }}</td>
+                                    <td>
+                                        {% if appointment.status != 'Cancelled' %}
+                                            <a href="{% url 'update_appointment' appointment.id %}" 
+                                               class="btn btn-sm btn-outline-primary">Edit</a>
+                                            <a href="{% url 'cancel_appointment' appointment.id %}" 
+                                               class="btn btn-sm btn-outline-danger"
+                                               onclick="return confirm('Are you sure you want to cancel this appointment?')">Cancel</a>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-5">
+                        <h4>No appointments scheduled</h4>
+                        <p class="text-muted">You haven't scheduled any appointments yet.</p>
+                        <a href="{% url 'schedule' %}" class="btn btn-primary">Schedule Your First Appointment</a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
